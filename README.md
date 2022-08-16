@@ -1,5 +1,5 @@
-# bank-accounts
-Projeto de contas de banco feito com NodeJS, com as opções de 'Criar Conta', 'Consultar Saldo', 'Depositar', 'Sacar' e 'Sair'. 
+# BANK ACCOUNTS
+Projeto de contas de banco feito com NodeJS, com as opções de 'Criar Conta', 'Consultar Saldo', 'Depositar', 'Sacar', 'transferir' e 'Sair'. 
 Sem interface gráfica, apenas com terminal.
 
 ## Como usar:
