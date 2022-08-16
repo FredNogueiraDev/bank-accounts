@@ -21,7 +21,7 @@ function operation() {
             if (action === 'Criar Conta') { createAccount() }
             else if (action === 'Consultar Saldo') { getAccountBalance() }
             else if (action === 'Depositar') { deposit() }
-            else if (action === 'Sacar') { }
+            else if (action === 'Sacar') { withdraw() }
             else if (action === 'Sair') { exitProcess() }
         })
         .catch((err) => console.log(err))
@@ -96,8 +96,6 @@ function getAccountBalance(){
         })
 }
 
-
-
 // add an amount to user account
 function deposit() {
     inquirer
@@ -157,8 +155,62 @@ function addAmount(accountName, amount){
     console.log(chalk.green(`Foi depositado o valor de R$${amount} na sua conta!`))
 }
 
+// get money from account
+function  withdraw(){
+    inquirer
+        .prompt([
+            {
+                name: 'accountName',
+                message: 'Qual seu nome de usuário?'
+            }
+        ])
+        .then((answer) => {
+            const accountName = answer['accountName']
 
+            if(!checkAccount(accountName)){
+                return withdraw()
+            }
 
+            inquirer
+                .prompt([
+                    {
+                        name: 'amount',
+                        message: 'Quanto você deseja sacar?'
+                    }
+                ])
+                .then((answer) => {
+                    const amount = answer['amount']
+
+                    removeAmount(accountName, amount)
+                    operation()
+                })
+        })
+}
+function removeAmount(accountName, amount){
+    const accountData = getAccount(accountName);
+    
+    if(!amount){
+        console.log(chalk.bgRed.black('Ocorreu um erro, tente novamente...'))
+        return withdraw()
+    }
+
+    if (accountData.balance < amount){
+        console.log(chalk.bgRed.black('Valor indisponível!'))
+        return withdraw()
+    }
+
+    accountData.balance = parseFloat(accountData.balance) - parseFloat(amount)
+
+    fs.writeFileSync(
+        `accounts/${accountName}.json`, 
+        JSON.stringify(accountData),
+        function(err){
+            console.log(err)
+        },
+    )
+    console.log(chalk.bgGreen.black(`Saque de R$${amount} realizado com sucesso!`))
+    console.log(chalk.bgBlue.black(`Seu saldo atualizado é de R$${accountData.balance}`))
+}
 
 //Exit process
 function exitProcess() {
