@@ -12,7 +12,7 @@ function operation() {
             type: 'list',
             name: 'action',
             message: 'O que você deseja fazer?',
-            choices: ['Criar Conta', 'Consultar Saldo', 'Depositar', 'Sacar', 'Sair'],
+            choices: ['Criar Conta', 'Consultar Saldo', 'Depositar', 'Transferir','Sacar', 'Sair'],
         },
     ])
         .then((answer) => {
@@ -22,6 +22,7 @@ function operation() {
             else if (action === 'Consultar Saldo') { getAccountBalance() }
             else if (action === 'Depositar') { deposit() }
             else if (action === 'Sacar') { withdraw() }
+            else if (action === 'Transferir') { transfer() }
             else if (action === 'Sair') { exitProcess() }
         })
         .catch((err) => console.log(err))
@@ -210,6 +211,97 @@ function removeAmount(accountName, amount){
     )
     console.log(chalk.bgGreen.black(`Saque de R$${amount} realizado com sucesso!`))
     console.log(chalk.bgBlue.black(`Seu saldo atualizado é de R$${accountData.balance}`))
+}
+
+//transfer money to another user
+function transfer(){
+    inquirer
+    .prompt([
+        {
+            name: 'accountName',
+            message: 'Qual seu nome de usuário?'
+        },
+    ])
+    .then((answer) => {
+        const accountName = answer['accountName'];
+
+        if(!checkAccount(accountName)){
+            return transfer()
+        }
+        receivingUser(accountName)
+    })
+}
+function receivingUser(accountName){
+
+    inquirer
+    .prompt([
+        {
+            name: 'receiverUser',
+            message: 'Para quem você deseja transferir (nome do usuário)?'
+        },
+    ])
+    .then((answer) => {
+        const receiverUser = answer['receiverUser'];
+
+        if(!checkAccount(receiverUser)){
+            return transfer()
+        }
+
+        inquirer
+            .prompt([
+                {
+                    name: 'amount',
+                    message: "Quanto você deseja transferir?"
+                },
+            ])
+            .then((answer) => {
+                const amount = answer['amount']
+
+                valueVerification(accountName, amount, receiverUser)
+            })
+    })
+
+}
+function valueVerification(accountName, amount, receiverUser){
+    const accountData = getAccount(accountName);
+    const accountReceiverUserData = getAccount(receiverUser);
+    
+    if(!amount){
+        console.log(chalk.bgRed.black('Ocorreu um erro, tente novamente...'))
+        return transfer()
+    }
+
+    if(accountData.balance === 0){
+        console.log(chalk.bgRed.black('Você não possui dinheiro na conta, deposite antes de transferir.'))
+        return operation()
+    }
+    
+    if (accountData.balance < amount){
+        console.log(chalk.bgRed.black(`Valor indisponível! Seu saldo é de R$${accountData.balance}`))
+        return transfer()
+    }
+
+    accountData.balance = parseFloat(accountData.balance) - parseFloat(amount)
+    accountReceiverUserData.balance = parseFloat(accountReceiverUserData.balance) + parseFloat(amount)
+
+    fs.writeFileSync(
+        `accounts/${accountName}.json`, 
+        JSON.stringify(accountData),
+        function(err){
+            console.log(err)
+        },
+    )
+    fs.writeFileSync(
+        `accounts/${receiverUser}.json`, 
+        JSON.stringify(accountReceiverUserData),
+        function(err){
+            console.log(err)
+        },
+    )
+    console.log(chalk.bgGreen.black(`transferencia de R$${amount} realizado com sucesso!`))
+    console.log(chalk.bgBlue.black(`Seu saldo atualizado é de R$${accountData.balance}`))
+
+    operation()
 }
 
 //Exit process
