@@ -3,8 +3,9 @@ Projeto de contas de banco feito com NodeJS, com as opções de 'Criar Conta', '
 Sem interface gráfica, apenas com terminal.
 
 ## Como usar:
-* Clone o repositório completo
-* Digite no terminal 'npm start'
+* Clone o repositório completo 
+* Baixe as dependencias (npm i)
+* Inicialize o programa (npm start)
 * Utilize o programa.
 
 ## Como o programa funciona:
